@@ -1,0 +1,17 @@
+---
+title: "About"
+image: headshot.jpg
+about:
+  template: jolla
+  links:
+    - icon: linkedin
+      text: LinkedIn
+      href: https://linkedin.com/in/joshuali19
+    - icon: github
+      text: Github
+      href: https://github.com/joshuali19
+
+---
+
+Hi everyone! I'm Josh, an aspiring Data Scientist studying at UCLA, graduating March 2023. My programming experience is split extensively between R and Python, with some experience in PostgreSQL.
+My other links are referenced below, but this blog consists of my project write-ups, including code. Please look around!

@@ -1,0 +1,19 @@
+project:
+  type: website
+
+website:
+  title: "Joshua Li"
+  navbar:
+    right:
+      - about.qmd
+      - icon: linkedin
+        href: https://linkedin.com/in/joshuali19
+      - icon: github
+        href: https://github.com/joshuali19
+format:
+  html:
+    theme: flatly
+    css: styles.css
+
+
+

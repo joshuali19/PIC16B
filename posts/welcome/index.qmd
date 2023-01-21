@@ -1,0 +1,12 @@
+---
+title: "Welcome To My Blog"
+author: "Joshua Li"
+date: "2023-01-10"
+categories: [news]
+---
+
+This is the first post for my blog. 
+
+![](thumbnail.jpg)
+
+This was originally built for a class, but now it expands to cover my own personal projects as well. Feel free to browse around, and view my contact information on the About page.
