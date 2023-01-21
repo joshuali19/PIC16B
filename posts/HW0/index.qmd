@@ -34,7 +34,7 @@ print(penguins.shape)
 penguins.head()
 ```
 
-Since this is not necessarily a data cleaning class, I will not explain too much about what to look out for, but the code will be provided for you to look through.
+Since this is not necessarily a data cleaning post, I will not explain too much about what to look out for, but the code will be provided for you to look through.
 ```{python}
 #| code-fold: true
 # change the species column
@@ -42,7 +42,7 @@ penguins['Species'] = penguins['Species'].str.split().str.get(0)
 # drop NAs corresponding to culmen length or depth
 p_cleaned = penguins.dropna(subset=['Culmen Length (mm)', 'Culmen Depth (mm)'])
 
-p_cleaned = p_cleaned[p_cleaned.Sex != '.']
+p_cleaned = p_cleaned[p_cleaned.Sex != '.'] # other data cleaning
 
 # subset by useful data
 penguins = p_cleaned[['Species',
@@ -94,7 +94,7 @@ This is helpful in a univariate and bivariate setting. Both display the data in 
 There are a bunch of different plot types, which I will not go more in depth about, but please explore on the official documentation of [`matplotlib`](https://matplotlib.org/stable/plot_types/index.html), [`plotly`](https://plotly.com/python-api-reference/plotly.express.html) or any other plotting software that you might use.
 
 ### 3. Create your visualization
-For this example, we will use `matplotlib` to create my visualization. As stated above, we will use a scatter plot to display this information. The necessary parameters for a scatter plot are the x
+For this example, we will use `matplotlib` to create my visualization. As stated above, we will use a scatter plot to display this information. The necessary parameters for a scatter plot are the data that will into the x and the y axis.
 
 ```{python}
 from matplotlib import pyplot as plt
