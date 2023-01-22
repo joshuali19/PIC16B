@@ -9,12 +9,12 @@ jupyter: pic16b
 
 This post will go through the basics of creating a descriptive data visualization step-by-step. By the end of this post, you will be able to
 
-1. decide the data to visualize
-2. determine the best fit for visualizing said data
-3. create a basic visualization
-4. label the visualization effectively
-5. subset by different groups
-6. extract insights from the visualization
+1. [decide the data to visualize](#step1)
+2. [determine the best fit for visualizing said data](#step2)
+3. [create a basic visualization](#step3)
+4. [label the visualization effectively](#step4)
+5. [subset by different groups](#step5)
+6. [extract insights from the visualization](#step6)
 
 ## Preprocessing
 
@@ -58,7 +58,7 @@ Once you have clean data, you can move on to the visualization process.
 
 ## Visualization
 
-### 1. Decide on what data you want to visualize
+### 1. Decide on what data you want to visualize {#step1}
 
 It may be helpful to look at some bivariate summary statistics to help gauge any particular interest with specific variables. This will avoid unnecessary time looking at uninformative visualizations.
 
@@ -73,7 +73,7 @@ We see that within each sex, there seems to be a clear distinction with Adelie p
 
 I would encourage you to form more tables if you would like to find more insights, but for the purposes of this demonstration, this is sufficient information to create a visualization based on `Culmen Length` and `Culmen Depth`.
 
-### 2. What is the best type of visualization (for your data)?
+### 2. What is the best type of visualization (for your data)? {#step2}
 
 Objectively, the best visualization is a pie chart (just kidding). Each type of visualization serves its own purpose given the type of data you want to visualize. Here are some pointers for which visualization to use for different data.
 
@@ -86,14 +86,17 @@ Scatter plots are most useful with two continuous variables, as it seeks to plot
 Both bar and box plots are most useful when you are graphing a continuous variable with a categorical variable. One of the axis will denote the categories, while the other will display the length (or spread) corresponding to the continuous variable.
 
 #### Tables
+
 These are helpful with categorical data, seeing if there is any correlation, or displays the relative frequency of the data.
 
 #### Histograms
+
 This is helpful in a univariate and bivariate setting. Both display the data in sets of bins that will display the distribution of data among those points. The data can be discrete or continuous, but the axes will always be coerced to categorical bins.
 
 There are a bunch of different plot types, which I will not go more in depth about, but please explore on the official documentation of [`matplotlib`](https://matplotlib.org/stable/plot_types/index.html), [`plotly`](https://plotly.com/python-api-reference/plotly.express.html) or any other plotting software that you might use.
 
-### 3. Create your visualization
+### 3. Create your visualization {#step3}
+
 For this example, we will use `matplotlib` to create my visualization. As stated above, we will use a scatter plot to display this information. The necessary parameters for a scatter plot are the data that will into the x and the y axis.
 
 ```{python}
@@ -107,7 +110,8 @@ plt.show()
 
 This fulfills the requirement of plotting. However, if someone was given this visualization, it would be completely uninformative. What are the axes measuring? In what unit? What does each point represent? We need to add some informative labels and narrative text that best describes this.
 
-### 4. Label the visualization
+### 4. Label the visualization {#step4}
+
 ```{python}
 # create a scatter plot by culmen length and culmen depth
 fig, ax = plt.subplots(1)
@@ -121,7 +125,8 @@ plt.show()
 
 Nice! We have some points on a grid that represent `Culmen Length` and `Culmen Depth`. What does this visualization tell us about the relationship between the two variables? At a first glance, it seems like there is no real indicator of any correlation between the two. Recall the information that we learned about from the summary statistics. There were differences seen when separated by the `Species`. Let us implement the first through some color contrast, which can be done through adding parameters to the `plt.scatter()` function.
 
-### 5. Subset the data by groups
+### 5. Subset the data by groups {#step5}
+
 ```{python}
 
 # create a scatter plot by culmen length and culmen depth
@@ -157,7 +162,8 @@ ax.legend()
 plt.show()
 ```
 
-### 6. How does this inform people?
+### 6. What insights can you draw from the visualization? {#step6}
+
 Great! You have now created your first data visualization! However, a pretty visualization means nothing unless you can draw insight out of it. How does this visualization help further your analysis? How would the readers interpret this graphic?
 
 In this example, we have visualized the relationship between `Culmen Length` and `Culmen Depth` for penguins by species. The clustering within each group suggests that there may be some boundaries (with error) that could accurately assess the species of a penguin through these two traits. This can lead down the path of creating more visualizations to be exhaustive with your search, or to perhaps create a model.

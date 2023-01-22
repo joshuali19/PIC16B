@@ -212,12 +212,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <p>This post will go through the basics of creating a descriptive data visualization step-by-step. By the end of this post, you will be able to</p>
 <ol type="1">
-<li>decide the data to visualize</li>
-<li>determine the best fit for visualizing said data</li>
-<li>create a basic visualization</li>
-<li>label the visualization effectively</li>
-<li>subset by different groups</li>
-<li>extract insights from the visualization</li>
+<li><a href="#step1">decide the data to visualize</a></li>
+<li><a href="#step2">determine the best fit for visualizing said data</a></li>
+<li><a href="#step3">create a basic visualization</a></li>
+<li><a href="#step4">label the visualization effectively</a></li>
+<li><a href="#step5">subset by different groups</a></li>
+<li><a href="#step6">extract insights from the visualization</a></li>
 </ol>
 <section id="preprocessing" class="level2">
 <h2 class="anchored" data-anchor-id="preprocessing">Preprocessing</h2>
@@ -235,7 +235,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="cell-output cell-output-stdout">
 <pre><code>(344, 17)</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="2">
+<div class="cell-output cell-output-display" data-execution_count="26">
 
 <div>
 
@@ -393,13 +393,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </section>
 <section id="visualization" class="level2">
 <h2 class="anchored" data-anchor-id="visualization">Visualization</h2>
-<section id="decide-on-what-data-you-want-to-visualize" class="level3">
-<h3 class="anchored" data-anchor-id="decide-on-what-data-you-want-to-visualize">1. Decide on what data you want to visualize</h3>
+<section id="step1" class="level3">
+<h3 class="anchored" data-anchor-id="step1">1. Decide on what data you want to visualize</h3>
 <p>It may be helpful to look at some bivariate summary statistics to help gauge any particular interest with specific variables. This will avoid unnecessary time looking at uninformative visualizations.</p>
 <div class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># creates summary statistics of numeric variables by species</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>penguins.groupby([<span class="st">'Species'</span>]).aggregate([np.mean, np.std])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
+<div class="cell-output cell-output-display" data-execution_count="28">
 
 <div>
 
@@ -500,8 +500,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>We see that within each sex, there seems to be a clear distinction with Adelie penguins from the other two species with regard to <code>Culmen Length</code>. We also see this similar distinction with Gentoo penguins and the other two with regards to <code>Culmen Depth</code>.</p>
 <p>I would encourage you to form more tables if you would like to find more insights, but for the purposes of this demonstration, this is sufficient information to create a visualization based on <code>Culmen Length</code> and <code>Culmen Depth</code>.</p>
 </section>
-<section id="what-is-the-best-type-of-visualization-for-your-data" class="level3">
-<h3 class="anchored" data-anchor-id="what-is-the-best-type-of-visualization-for-your-data">2. What is the best type of visualization (for your data)?</h3>
+<section id="step2" class="level3">
+<h3 class="anchored" data-anchor-id="step2">2. What is the best type of visualization (for your data)?</h3>
 <p>Objectively, the best visualization is a pie chart (just kidding). Each type of visualization serves its own purpose given the type of data you want to visualize. Here are some pointers for which visualization to use for different data.</p>
 <section id="scatter-plots" class="level4">
 <h4 class="anchored" data-anchor-id="scatter-plots">Scatter plots</h4>
@@ -521,8 +521,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>There are a bunch of different plot types, which I will not go more in depth about, but please explore on the official documentation of <a href="https://matplotlib.org/stable/plot_types/index.html"><code>matplotlib</code></a>, <a href="https://plotly.com/python-api-reference/plotly.express.html"><code>plotly</code></a> or any other plotting software that you might use.</p>
 </section>
 </section>
-<section id="create-your-visualization" class="level3">
-<h3 class="anchored" data-anchor-id="create-your-visualization">3. Create your visualization</h3>
+<section id="step3" class="level3">
+<h3 class="anchored" data-anchor-id="step3">3. Create your visualization</h3>
 <p>For this example, we will use <code>matplotlib</code> to create my visualization. As stated above, we will use a scatter plot to display this information. The necessary parameters for a scatter plot are the data that will into the x and the y axis.</p>
 <div class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
@@ -537,8 +537,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <p>This fulfills the requirement of plotting. However, if someone was given this visualization, it would be completely uninformative. What are the axes measuring? In what unit? What does each point represent? We need to add some informative labels and narrative text that best describes this.</p>
 </section>
-<section id="label-the-visualization" class="level3">
-<h3 class="anchored" data-anchor-id="label-the-visualization">4. Label the visualization</h3>
+<section id="step4" class="level3">
+<h3 class="anchored" data-anchor-id="step4">4. Label the visualization</h3>
 <div class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create a scatter plot by culmen length and culmen depth</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>)</span>
@@ -554,8 +554,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <p>Nice! We have some points on a grid that represent <code>Culmen Length</code> and <code>Culmen Depth</code>. What does this visualization tell us about the relationship between the two variables? At a first glance, it seems like there is no real indicator of any correlation between the two. Recall the information that we learned about from the summary statistics. There were differences seen when separated by the <code>Species</code>. Let us implement the first through some color contrast, which can be done through adding parameters to the <code>plt.scatter()</code> function.</p>
 </section>
-<section id="subset-the-data-by-groups" class="level3">
-<h3 class="anchored" data-anchor-id="subset-the-data-by-groups">5. Subset the data by groups</h3>
+<section id="step5" class="level3">
+<h3 class="anchored" data-anchor-id="step5">5. Subset the data by groups</h3>
 <div class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create a scatter plot by culmen length and culmen depth</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>)</span>
@@ -594,8 +594,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 </div>
 </section>
-<section id="how-does-this-inform-people" class="level3">
-<h3 class="anchored" data-anchor-id="how-does-this-inform-people">6. How does this inform people?</h3>
+<section id="step6" class="level3">
+<h3 class="anchored" data-anchor-id="step6">6. What insights can you draw from the visualization?</h3>
 <p>Great! You have now created your first data visualization! However, a pretty visualization means nothing unless you can draw insight out of it. How does this visualization help further your analysis? How would the readers interpret this graphic?</p>
 <p>In this example, we have visualized the relationship between <code>Culmen Length</code> and <code>Culmen Depth</code> for penguins by species. The clustering within each group suggests that there may be some boundaries (with error) that could accurately assess the species of a penguin through these two traits. This can lead down the path of creating more visualizations to be exhaustive with your search, or to perhaps create a model.</p>
 </section>
