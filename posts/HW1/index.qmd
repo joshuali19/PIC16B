@@ -1,0 +1,16 @@
+---
+title: "[Different Blog Title]"
+author: "Joshua Li"
+date: "2023-02-01"
+categories: [code, analysis]
+## image: "image.jpg"
+jupyter: pic16b
+---
+
+In this blog post, we will be diving deeper into data visualization. By the end of this post, you will be able to:
+
+1. Create a database that stores tables
+2. Utilize SQL to extract necessary data
+3. Create a data visualization using `plotly`
+
+This article should be a good exercise for the range of the data visualization process. I will first go through the steps, and then provide additional examples.
