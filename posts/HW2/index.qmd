@@ -1,0 +1,292 @@
+---
+title: Scraping TMDB with Scrapy
+author: Joshua Li
+date: '2023-02-08'
+jupyter: pic16b
+---
+
+For this blog post, we will dive into web scraping. We will be looking into the movie database (TMDB) as our website which we will scrape data from. **The goal of this article will be to look at a specific TV show, find all of its actors, and record their whole filmography (as actors).** After reading through this article, you will be able to:
+
+1. [Extract elements from a web page](#step1)
+2. [Create a spider](#step2)
+3. [Automate extraction through the spider](#step3)
+4. [Figure out how to avoid website blockers](#step4)
+
+## Extract elements from a web page {#step1}
+
+This is practice to figure out what CSS elements are needed to be extracted. This is done manually so that you get a good sense of how to access specific elements. In this example, we will be looking at the web page corresponding to [*Community*](https://www.themoviedb.org/tv/18347-community). 
+
+In general, the framework of extracting elements is as follows:
+- find the element you want to extract
+- right-click on the element, and select "Inspect".
+- note the HTML tags that uniquely identify that element.
+
+### Navigate to "Full Cast & Crew"
+
+For this project, we want to view the "Full Cast & Crew" page of the TV page. We will find that in the middle-left of the page, and we can see that the HTML tags wrapped around it are `<section class="panel top_billed">`, `<p>` and `<a>` tags. We can see the URL we want to go to reflects a relative path that adds to the current web page (i.e. `/cast`).
+
+![](HTML_code8.png)
+
+Underlying HTML Code:
+![](HTML_code2.png)
+
+We will now go to this page.
+
+### Navigate to an Actor's Page
+
+Since we want to find the filmography of every actor, we need to navigate to each individual actor's page. For this example, we will look at navigating to Joel McHale's (plays Jeff Winger in *Community*) page.
+
+The element we want is McHale's headshot, which provides a URL to go to his page. We inspect this element, and see that his headshot is within a `<ol class="people credits">`, `<li>`, `<a>` tag. We want the URL found in the `<a>` tag, in the attribute `href`. 
+
+![](HTML_code9.png)
+
+Underlying HTML Code:
+![](HTML_code1.png)
+
+We can now navigate to his page.
+
+### Extract all the works they have acted in
+
+Now, we are able to look at McHale's work in the `Acting` section. We will look at how to extract his name from the page, as well as "California King" from the filmography. 
+
+First, we will extract his name from the big title on the top of the page. We can see that the element is wrapped in a `<div class="title">`, and `<a>` tag.
+
+![](HTML_code3.png)
+
+Underlying HTML Code:
+![](HTML_code4.png)
+
+Now, let us look at "California King". We can see that it is wrapped in a `<table class="card credits">`, `<a class="tooltip">`, and `<bdi>` tag.
+
+![](HTML_code3.png)
+
+Underlying HTML Code:
+![](HTML_code4.png)
+
+With this information, we can now begin to automate this process with `scrapy`.
+
+## Create A Spider {#step2}
+
+This section will look at the creation of a spider. There are a couple of steps that you need to take.
+
+1. Create a new repository
+2. Ensure `scrapy` is in your environment 
+3. Start a `scrapy` project in the repository
+
+### Create a new repository
+
+The first step is to create a new GitHub repository. This is done through a [GitHub](https://github.com/) account. This repository will house your spider, and can be version controlled to account for different changes. Sync it up with your corresponding GitHub Desktop account, and clone the repository to your local device with this [tutorial](https://git-scm.com/book/en/v2/Git-Basics-Getting-a-Git-Repository).
+
+Now that the repository is local, we can move on to the next step.
+
+### Ensure `scrapy` is in your environment
+
+The easiest way to do this is to open up **Anaconda-Navigator**, and to look at the tab "Environments". Find the environment that corresponds to the one you will run the spider on. Search for `scrapy` on the installed packages. If it doesn't show up, find it on the uninstalled packages and install it.
+
+### Start a `scrapy` project in the repository
+
+Since you have `scrapy` installed and a local repository, navigate to the local repository via Terminal, and type the following:
+
+```
+conda activate <myenv>
+scrapy startproject TMDB_scraper
+cd TMDB_scraper
+```
+
+This will automatically create a spider with the necessary python files for it to run. In particular, we will use `settings.py`. Go into the `spiders` folder and also create a `tmdb_spider.py` file and write this as the base.
+
+```{python}
+# to run 
+# scrapy crawl tmdb_spider -o movies.csv
+
+import scrapy
+
+class TmdbSpider(scrapy.Spider):
+    name = 'tmdb_spider'
+    
+    start_urls = ['https://www.themoviedb.org/tv/18347-community']
+```
+
+## Automate extraction through the spider {#step3}
+
+We will now automate extraction through the spider. This is where we will need to recall the information we gained earlier (see [above]{#step1}), as well as have knowledge of CSS selectors. Find out more about CSS selectors [here](https://flukeout.github.io/) and [here](https://www.w3schools.com/cssref/css_selectors.php). As you experiment with how to extract this via code, it is helpful to use [`scrapy shell`](https://docs.scrapy.org/en/latest/topics/shell.html) instead of using trial and error and running `.py` files. 
+
+### Scrapy Shell
+
+Here is a small example of using `scrapy shell` for experimentation. Navigate to the repository, open up a terminal, and run `scrapy shell https://www.themoviedb.org/tv/18347-community`(**NOTE**: You may run into errors such as 403, please look to [here](#step4) for guidance on how to resolve that; you want to see numbers of the form 200).
+
+Here is what happens when you run `scrapy shell https://www.themoviedb.org/tv/18347-community`, which is a request to access the main page for *Community*.
+
+![](HTML_code7.png)
+
+You can see that there is are two lines of `GET (200) ...`, which signifies that the request went through. I then sent a request to find the URL for the "Full Cast & Crew" page, by subsetting via the tags it is wrapped in:
+```
+response.css("section.top_billed p.new_button a").attrib['href']
+```
+
+This can be done to experiment with other subsetting to ensure you are getting the right elements.
+
+### Creating Functions to Scrape TMDB
+
+Now, we are able to create a web scraper, complete with functions that will do it for us at one command. There are three main functions necessary for us to scrape the filmography of actors from *Community*. We need a function to parse to main TV page, one to parse the list of actors, and one to parse the actor's filmography. All of these functions should go into the `tmdb_spider.py` file under the `TmdbSpider` class. I will go through each one.
+
+#### Repository
+
+Here is the [repository](https://github.com/joshuali19/tmdb) that houses all the data and code for this scraper.
+
+#### Parsing main TV page
+
+```{python}
+def parse(self, response):
+        '''
+        Parses the TMDB cast and crew website.
+        @ input:
+        - self: TmdbSpider
+        - response: the call to start_urls[0]
+        @ output:
+        - yields a request to navigate to the page with actors.
+        '''
+        cast = self.start_urls[0] + '/cast' # hardcode the cast page
+        
+        # go to cast & crew page, run parse_full_credits
+        yield scrapy.Request(cast, callback = self.parse_full_credits)
+```
+
+This function gets the starting URL, which is linked to the TMDB *Community* page. Since we recognize that the "Full Cast & Crew" can be found by just adding `/cast` to the end of the URL, we just hardcode that in, and send a request to go to that URL, and to run `parse_full_credits`.
+
+#### Parsing the acting credits page
+```{python}
+def parse_full_credits(self, response):
+        '''
+        for each actor, goes to their respective acting profile page on TMDB.
+        @ input:
+        - self: TmdbSpider
+        - response: the call to the "Full Cast & Crew" page
+        @ output:
+        - yields a request to navigate to the profile page of each actor.
+        '''
+        
+        # for each page redirection on the cast photos
+        for page in response.css('ol.people.credits:not(.crew) li a'):
+            actor_page = page.attrib['href'] # obtain the hyperlink
+            actor_page = 'https://www.themoviedb.org' + actor_page # append to main url
+            
+            # go to the actor's page, run parse_actor_page
+            yield scrapy.Request(actor_page, callback = self.parse_actor_page)
+```
+
+This function assumes that we are on the page with all the actors in *Community*. We now need to navigate to every actor's home page. As mentioned earlier, we know that the link is contained within the HTML tags of `<ol class="people credits">`, `<li>`, and `<a>`. However, that alone is not enough to get **ONLY** the actors; it includes the crew members. We don't want that, so looking further into the HTML code, we see that the crew members has a special designation in their tag `<ol class="people credits crew">`. We can use this to our advantage to omit any `<ol>` tags with class "crew" with the `:not()` CSS selector. Now, we get that for every element within the actors section, obtain the hyperlink for their page, and submit a request to go to the actor's profile for every actor in *Community*, and run `parse_actor_page`.
+
+#### Parsing actor's profile page
+```{python}
+def parse_actor_page(self, response):
+        '''
+        obtains the films of the actor.
+        @ input:
+        - self: TmdbSpider
+        - response: the call to the actor's page
+        @ output:
+        - yields a dictionary with actor name and movie.
+        '''
+        # obtain the actor name
+        actor_name = response.css('div.title a::text').get()
+        
+        # for each of the links in the acting section of his or her page
+        for acting_gig in response.css('h3.zero + table.card.credits a.tooltip bdi::text'):
+            title = acting_gig.get() # obtain the right URL
+            
+            yield {'actor': actor_name, 'movie_or_TV_name': title} 
+            # yield a dictionary with actor and title of movie they were in.
+```
+
+This function assumes that you are on the actor's page. We first need to get the actor's name for our dictionary, which is conveniently placed in bold font at the top of the page in a `<div class="title">` and `<a>` tag. The harder part is getting the movies/TV shows that the actor has acted in. In this case, it is found underneath `<h3 class="zero">`. The selectors to the right of the `+` operator denote that you only want to find elements within `h3.zero`. You go within the `<table class="card credits">` and `<a class="tooltip">` and `<bdi>` tags to get the text within these subsets. That will give you the title. For every film, we can yield a dictionary linking a person with a specific film.
+
+With these three functions, we are able to run the spider and have it crawl the TMDB website for *Community* websites. This can apply to any other start URL for other movies or TV shows.
+
+## Figure out how to avoid blockers {#step4}
+
+This is something that will be common as you scrape the web more. Websites will have methods that will determine if there is a bot or a program scraping data. If they detect suspicious behavior of this sort, they will block the request to obtain data, which will be displayed in the form of `40_` errors. This is a hinderance to data collection, but there are workarounds for it. 
+
+For this example with the default settings, TMDB will block requests to access their data, creating a `403` error. My workaround was based off of this [article](https://scrapeops.io/python-scrapy-playbook/scrapy-403-unhandled-forbidden-error/): I changed three lines in my `settings.py` file. 
+
+By default, your `scrapy` user agent will identify itself as a scraper when it goes to scrape websites. However, this is a clear indicator for websites to block the request. I changed the user agent by assigning a common user agent in my `settings.py` file.
+
+```{python}
+## settings.py
+
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393'
+```
+
+Another way that websites can discern a suspicious request is the speed of download requests. An automated bot that knows where to look would be faster than any human interaction with the interface. Therefore, it is important to set a good delay of download to not raise suspicions.
+
+```{python}
+## settings.py
+
+# Configure a delay for requests for the same website (default: 0)
+# See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
+# See also autothrottle settings and docs
+DOWNLOAD_DELAY = 5
+```
+
+The last thing I did was disable cookies, because some websites use cookies to spot bot behavior.
+
+```{python}
+## settings.py
+
+# Disable cookies (enabled by default)
+COOKIES_ENABLED = False
+```
+
+However, these changes may not work for everyone. I would advise you to check out these other links ([link1](https://doc.scrapy.org/en/latest/topics/practices.html#avoiding-getting-banned), [link2](https://scrapeops.io/web-scraping-playbook/403-forbidden-error-web-scraping/), [link3](https://scrapingrobot.com/blog/most-common-user-agents/)) for more help.
+
+## Bonus: Visualizing Scraped Data 
+
+With this scraper, we are able to save our findings in a `.csv` file with the actor and respective movies they acted in. This is done through the terminal, running the command
+
+```
+scrapy crawl tmdb_spider -O movies.csv
+```
+
+
+This command is telling the name of our spider `tmdb_spider` to scrape the web, and to overwrite output (`-O`) on a relative path to a file `movies.csv`. Replace `-O` with `-o` if you want to append the output to the current file instead. Now, you should be able to have the data accessible in `movies.csv` for you to use. We can use this data to create visualizations for the most common movies/TV shows that these actors have also played in. 
+
+```{python}
+import pandas as pd
+import numpy as np
+
+movies = pd.read_csv("./movies.csv")
+```
+
+```{python}
+movies
+```
+
+```{python}
+# get the count of actors in each TV/movie
+shared_movies = movies.groupby('movie_or_TV_name').agg(len).sort_values('actor', ascending = False).reset_index()
+```
+
+```{python}
+t20_shared_movies = shared_movies[1:21] # gets the first 20 films, besides Community (#1)
+```
+
+```{python}
+import plotly.express as px
+
+fig = px.bar(t20_shared_movies,
+            x = 'movie_or_TV_name',
+            y = 'actor',
+            labels = {'movie_or_TV_name': 'Movie/TV Show',
+                     'actor': 'Number of Shared Actors'},
+            title = "Top 20 Shows with Shared Actors with Community Cast",
+            height = 700,
+            text_auto = '.2s')
+fig.show(renderer = 'notebook')
+#fig.show()
+```
+
+This ranking of shows with shared actors is interesting. Coming into this post, I expected that there would be at least some Marvel movie, given that *Community* is directed by the Russo Brothers, and a majority of the cast has appeared on some of their movies. Instead, we are given many different TV shows. This makes sense given that people have the potential to make guest appearances to most of these shows. Likewise, *Community* itself is a show with many guest appearances due to their many homages to popular culture and movie tropes. A future direction would be to select only the actors who appear in a "majority" of episodes, and to only include recurring characters (not one episode guest appearances), to see if this list would change. However, we can see from this that the whole cast of Community has a wide array of actors with popular TV shows on their filmography.
+
+## Conclusion
+
+Now, you should be able to get started with web scraping! Take your time in learning CSS selectors, and finding the right tags to be your parameters. Be patient if it takes a while to fetch your requests, especially if websites block it. There is a workaround for most websites. Test it out for yourself and see the plethora of data that becomes available to you!
