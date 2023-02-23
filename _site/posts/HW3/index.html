@@ -269,7 +269,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Then, within the content section, we see again two more templates, one for the header and one for the content. We will see how we will alter this with different pages.</p>
 </section>
 <section id="submit.html" class="level3">
-<h3 class="anchored" data-anchor-id="submit.html">submit.html</h3>
+<h3 class="anchored" data-anchor-id="submit.html"><span id="submitlol">submit.html</span></h3>
 <p>The first page that we will need to make is a <code>submit.html</code>, so that users can write a message and submit it to the database. However, we do not need to rewrite the code written in <code>base.html</code>, but expand upon that by writing with the template blocks. Here is the code:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>{% extends 'base.html' %}</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -311,7 +311,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>We see that there are two other blocks containing <code>if</code> statements. This will be run only if the condition is held, which we will cover how to control when this happens.</p>
 </section>
 <section id="view.html" class="level3">
-<h3 class="anchored" data-anchor-id="view.html">view.html</h3>
+<h3 class="anchored" data-anchor-id="view.html"><span id="view">view.html</span></h3>
 <p>The other page we need to create is the page to view other people’s submissions. It will follow the same <code>base.html</code> template, but will display different information than <code>submit.html</code>. Here is the code:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>{% extends 'base.html' %}</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -373,7 +373,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span>:</span>
 <span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># return an error</span></span>
 <span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> render_template(<span class="st">'view.html'</span>, error <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>We see that the <code>submit</code> page takes the base URL form through the <code>@app.route</code>. It contains two methods, which includes a <code>'GET'</code> and <code>'POST'</code>, one which displays before and after a message submission, respectively. It will call <code>render_template()</code>, which will render <code>submit.html</code>, which extends <code>base.html</code>. Depending on the situation, it may add some keyword arguments, which would change the display based on <code>if</code> statements that we have discussed in <a href="#step1">Step 1</a>. The same logic applies for <code>view.html</code>, which will redirect to a subpage with the path <code>/view/</code>, and run <code>view()</code> to render the page to view random messages.</p>
+<p>We see that the <span id="submit"><code>submit</code></span> page takes the base URL form through the <code>@app.route</code>. It contains two methods, which includes a <code>'GET'</code> and <code>'POST'</code>, one which displays before and after a message submission, respectively. It will call <code>render_template()</code>, which will render <code>submit.html</code>, which extends <code>base.html</code>. Depending on the situation, it may add some keyword arguments, which would change the display based on <code>if</code> statements that we have discussed in <a href="#step1">Step 1</a>. The same logic applies for <code>view.html</code>, which will redirect to a subpage with the path <code>/view/</code>, and run <code>view()</code> to render the page to view random messages.</p>
 <p>Through these wrapper functions, whenever a user navigates through the message bank, this will help display the corresponding template correctly. Now, we need to connect this with the main purpose, which is to create messages and save it so that people can view it. This needs to be done through a database, which we would need to create functions in order to implement it with our web app.</p>
 </section>
 <section id="implementing-a-database" class="level1">
@@ -409,7 +409,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>            cursor.execute(query)</span>
 <span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>            <span class="co"># return the database</span></span>
 <span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> g.message_db</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>What this does is tries to retrieve the database. If it doesn’t exist, it will create a connection and create a table within the database and return the database.</p>
+<p>What this function does is retrieve the database. If it does exist, then it will return the database. If it doesn’t exist, it will create a connection and create a table within the database and return the database. This is a function that will be used in the other functions to ensure that the same table will be used when inserting messages and viewing random messages.</p>
 </section>
 <section id="add-messages-to-table" class="level2">
 <h2 class="anchored" data-anchor-id="add-messages-to-table">Add Messages to Table</h2>
@@ -424,7 +424,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">    '''</span></span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># obtain the request and the information</span></span>
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    message <span class="op">=</span> request.form[<span class="st">'message'</span>]</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    handle <span class="op">=</span> request.form[<span class="st">'user'</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    handle <span class="op">=</span> request.form[<span class="st">'user'</span>]</span>
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># get the table, and insert it into the table</span></span>
 <span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> get_message_db() <span class="im">as</span> conn:</span>
@@ -433,7 +433,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        conn.commit() <span class="co"># save changes</span></span>
 <span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># return message and handle</span></span>
 <span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> message, handle</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This function will take a request, assuming that a user has submitted a message, and output the message and handle. In between, the function will also take this message and handle and add it to the table through a SQL query.</p>
+<p>This function will take a request, assuming that a user has submitted a message, and output the message and handle. This function will connect with the submission page of the website (see the <a href="#submit"><code>submit()</code></a> function). When a user provides input for both the message and the handle, the request will contain both of these inputs, and we will run <code>insert_message()</code> to store this into the database. The function itself will also take this message and handle and add it to the table through a SQL query, using <code>get_message_db()</code> in order to establish our connection.</p>
+<p>This function also provides the output necessary to write a confirmation message to the user that their message was put into the database. We write the <code>insert_message()</code> to a local variable that contains the message and the handle. These become keyword arguments to <code>render_template()</code> to activate the <code>if name</code> statement within the <code>submit.html</code> so that the page would thank them for a message and spit out their message back to them to show what they have submitted (see <a href="#submitlol"><code>submit.html</code></a>).</p>
 </section>
 <section id="get-random-messages" class="level2">
 <h2 class="anchored" data-anchor-id="get-random-messages">Get Random Messages</h2>
@@ -453,7 +454,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        msgs <span class="op">=</span> cursor.fetchall()</span>
 <span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># return list</span></span>
 <span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> msgs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This function takes in a number <code>n</code>, and obtains <code>n</code> random messages, which is stored on a list.</p>
+<p>This function takes in a number <code>n</code>, and obtains <code>n</code> random messages, which is stored on a list. This connects with the <code>view()</code> function, where the number of messages to view is hard coded as 5. Using <code>get_messages_db()</code> to obtain the connection, we use a SQL query to randomly order the rows in the table and getting the top <code>n</code> messages. In the <code>view()</code> function, it is stored within a local variable called <code>msgs</code>, which is a list containing tuples with the message and handle. When <code>render_template()</code> is called with the argument <code>msgs</code>, we use a <code>for</code> loop cycle through the <code>n</code> messages and to display them on different <code>&lt;div&gt;</code> tags (see <a href="#view"><code>view.html</code></a>).</p>
 <p>These functions are all helpful in the web app, allowing for a database to be utilized to store messages created by users and to retrieve said messages for viewers’ entertainment.</p>
 </section>
 </section>
