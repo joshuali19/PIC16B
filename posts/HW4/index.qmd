@@ -1,7 +1,7 @@
 ---
 title: Classifying Pets through Convolutional Neural Networks with Tensorflow
 author: Joshua Li
-date: '2023-02-27'
+date: '2023-02-28'
 jupyter: pic16b
 ---
 
