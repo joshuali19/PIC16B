@@ -1,7 +1,7 @@
 ---
-title: Recommending Spotify Songs
+title: Recommending Spotify Songs in Python
 author: Joshua Li
-date: '2023-03-25'
+date: '2023-03-24'
 categories:
   - code
   - analysis
@@ -21,17 +21,14 @@ This blog post is a recap of a final project for PIC16B W23 at UCLA. The goal of
 
 This blog post will go through the process of creating a recommendation system step-by-step, as well as explain some of the methods we used to create it. We learned a lot through this project, and we hope that you do too! Now, let’s get into it. Here is a diagram of the project workflow.
 
-![Workflow](workflow.png)
-
-
-The link to the repository for this project can be found here: https://github.com/joshuali19/pic16bproject
+![Project Workflow](workflow.png)
 
 # 2. Data Acquisition
 
 ## Million Playlist Dataset
 
 The first thing is to acquire the data necessary for this project. As mentioned in the introduction, we utilize the Spotify Million Playlist Dataset as our base dataset. This gives us each playlist in the form of a JSON file. Each playlist contains information about the playlist itself, like the number of songs, likes, playlist creator, etc. It also contains the information about the tracks within the playlist. For each track, there is information about the artist, the album it is a part of, and has unique identifiers for all of these things. This is all basic information that we can use. However, in order to build a recommendation system based on tracks and playlists, we need more than just demographic information of songs. We need to look into variables that would highlight specific features of songs. If you would like more information on the Million Playlist Dataset, please look at the [official challenge spec](https://www.aicrowd.com/challenges/spotify-million-playlist-dataset-challenge)
-
+ 
 ![Playlist JSON File](playlist_json.png)
 
 Above is the structure of the JSON file for an example playlist. This was provided by the provider of the Million Playlist Dataset, AICrowd. One can see all the playlist attributes listed, and the final one with all the tracks. In order to go through every single track in each playlist, we need to go through each of the different playlists and go through each of the tracks. After some experimentation, the fastest method was still to use a nested for loop to go through each element. However, this information given in the Million Playlist Dataset is not sufficient for our project.
@@ -224,6 +221,172 @@ def get_top_songs(playlist, song_df, feat_df, n = 10):
 
 This is most definitely not the best method, as these quantitative features are not clustered well by genre. Multiple genres may show similar values within certain features. I expect electronic dance music (EDM) and metal to score highly on the loudness metric, even though they are two completely different genres. One improvement to make with this is to incorporate the genres of the songs with the audio features to make better assessments and recommendations.
 
+## Collaborative Filtering
+
+The next three approaches will deal with a mathematical exploration of a technique common in the field of recommender systems, collaborative filtering. The premise of collaborative filtering is simple, being that if two people like one thing, then they are more likely to agree on their like/dislike for other things. Thanks to the Million Playlist Dataset, we have access to a massive amount of information concerning peoples’ preferences with respect to each other: deciding to include a song in one’s playlist is implicitly indicating a preference for that song. As a result, there are a wide variety of effective heuristics for determining similarity that can be applied to the user’s playlist, and the songs it contains, with respect to other playlists. We primarily opted to explore various forms of memory-based CF (also known as nearest-neighbor CF).
+
+## Item-Based Similarity
+
+One approach to memory based CF, not unlike our method for audio features, is to view the user’s playlist as the sum of its parts. If we can find a way to determine similarity between any two songs, then we can take the similarity of each song in the user’s playlist with respect to every other song in our dataset, and then identify the songs with the highest summed similarity not already in the user’s playlist as potential recommendations. To find the similarity between any two songs, we employ the presence of a song in each playlist of our dataset as a binary vector, and compute the cosine similarity between these vectors accordingly. Finally, we weigh the summed similarity for each song based on its inverse document frequency, and select information from the songs having the highest final values. The functions used for this method are shown below:
+
+```python
+def item_similarity(uri):
+    '''
+    gets the cosine similarity between an input song and every other song in the dataset
+    @ inputs:
+    - uri (string): input song's uri
+    @ outputs:
+    - counter dictionary whose keys are uri values of each song in dataset, values are similarity to input song
+    '''
+    #identifying row in binary_df corresponding to input song
+    song_row = binary_df.loc[uri].values.reshape(1, -1)
+    #computing similarity between input song and all other songs
+    similarity_scores = cosine_similarity(binary_df, song_row)
+    similarity_dict = {}
+    #creating a dictionary with URI as keys, associated similarity as values
+    for i, score in enumerate(similarity_scores):
+        similarity_dict[str(binary_df.index[i])] = score[0]
+    #returning counter version of dictionary, so that we can add it to others
+    return Counter(similarity_dict)
+
+def get_top_items(playlist, n = 10):
+    '''
+    determines which songs to recommend by summing binary item-based similarity for songs in user playlist, weighted with idf
+    @ inputs:
+    - playlist (dict): playlist that includes track info
+    - n (int): number of songs to recommend ; 10 for us
+    @ outputs:
+    - a list of tuples containing track name, artist name, and track link for unique songs with highest similarity score
+    '''
+    #creating an empty counter to store total similarity score
+    total_score = Counter()
+    for track in playlist['tracks']:
+        #using addition assignment to add each similarity score
+            if track['track_uri'] in binary_df.index:
+                total_score += item_similarity(track['track_uri'])
+    #applying IDF weighting to total similarity score
+    for uri in total_score.keys():
+        total_score[uri] *= idf_df.loc[uri][0]
+    #preventing songs in user input playlist from being suggested
+    repetition_blocker(total_score, playlist)
+    #using heap to find list of URIs associated with highest total similarity scores
+    top_songs = [items[0] for items in heapq.nlargest(n, total_score.items(), key=lambda x: x[1])]
+    #top_songs = heapq.nlargest(n, total_score.items(), key=lambda x: x[1])
+    #returning a list of tuples containing the track name, artist name, and a link to the song for the most similar songs
+    return [(song_df['track_name'][song_df['uri'] == uri].values[0],
+            song_df['artist_name'][song_df['uri'] == uri].values[0],
+            '//open.spotify.com/track/' + song_df['id'][song_df['uri'] == uri].values[0]) for uri in top_songs]
+```
+
+## Session-Based Similarity
+
+Another approach to memory based CF is to find a way to compare playlists directly over the song space. Instead of viewing songs as binary vectors based on their presence in playlists, we can view playlists as binary vectors based on whether or not they contain each song, and calculate cosine similarities between playlists accordingly. Then, for each song, we can take the idf-weighted sum of the aforementioned similarity between the user’s playlist and every playlist in the dataset that contains that song to yield a total similarity score, returning the same information as before about those songs with the highest total similarity scores. The functions used for this method are shown below:
+
+```python
+def is_uri_in_playlist(uri, playlist):
+    '''
+    determines whether or not each song in the dataset is in the user's playlist
+    @ inputs:
+    -uri (str): input song's uri
+    - playlist (dict): playlist that includes track info
+    @ outputs:
+    - true or false depending on whether or not song is in playlist
+    '''
+    #iterating through each track in user input playlist
+    for track in playlist['tracks']:
+        #checking if desired URI matches a track's URI
+        if track['track_uri'] == uri:
+            #returning true if we find a match
+            return True
+    #returning false otherwise
+    return False
+
+def session_similarity(playlist, n = 10):
+    '''
+    determines which songs to recommend by summing binary session-based similarities of playlists containing
+    each song, weighted with IDF
+    @ inputs:
+    - playlist (dict): playlist that includes track info
+    - n (int): number of songs to recommend ; 10 for us
+    @ outputs:
+    - a list of tuples containing track name, artist name, and track link for unique songs with highest similarity score
+    '''
+    #creating a binary encoding of the user input playlist w.r.t. dataset
+    encoded_playlist = [int(is_uri_in_playlist(uri, playlist)) for uri in binary_df.index]
+    #computing similarity between input playlist and all other playlists
+    session_similarity = cosine_similarity(binary_df.values.T, [encoded_playlist]).flatten()
+    #creating an empty counter to store total similarity score
+    total_score = {}
+    #iterating through each song in dataset
+    for uri in binary_df.index:
+        #taking dot product of playlist similarities and song's presence in each playlist, applying IDF weighting
+        total_score[uri] = sum(i[0] * i[1] for i in zip(binary_df.loc[uri].values, session_similarity)) * idf_df.loc[uri][0]
+    #preventing songs in user input playlist from being suggested
+    repetition_blocker(total_score, playlist)
+    #using heap to find n highest total similarity scores
+    top_songs = [items[0] for items in heapq.nlargest(n, total_score.items(), key=lambda x: x[1])]
+    #returning a list of tuples containing the track name, artist name, and a link to the song for the most similar songs
+    return [(song_df['track_name'][song_df['uri'] == uri].values[0],
+            song_df['artist_name'][song_df['uri'] == uri].values[0],
+            '//open.spotify.com/track/' + song_df['id'][song_df['uri'] == uri].values[0]) for uri in top_songs]
+```
+
+## TF-IDF-Based Similarity
+
+Our final approach to memory based CF is to incorporate term frequency into the computation of our similarity heuristic. Unlike inverse document frequency, our term frequency has no dependence upon a particular song. The idea we want to capture is that if a user’s playlist contains fewer songs, then any given song is a stronger indication of their interest than a playlist that contains many songs. Therefore, we assign to each playlist a term frequency value of 1/(|p|+50), where |p| is the number of songs in that playlist and 50 is chosen so as not to excessively reward very small playlists. Then, each song/playlist pair is assigned a value equal to the product of the song’s IDF and the playlists TF (irrespective of whether or not the playlist contains that song), and we compute cosine similarity on playlists and total song similarity for each song identically to the session-based method, except, as we have already accounted for IDF, we do not reweigh final scores based on IDF.  Once again, we return relevant information about the songs with the highest total similarity scores. The functions used for this method are shown below:
+
+```python
+def is_uri_in_playlist(uri, playlist):
+    '''
+    determines whether or not each song in the dataset is in the user's playlist
+    @ inputs:
+    -uri (str): input song's uri
+    - playlist (dict): playlist that includes track info
+    @ outputs:
+    - true or false depending on whether or not song is in playlist
+    '''
+    #iterating through each track in user input playlist
+    for track in playlist['tracks']:
+        #checking if desired URI matches a track's URI
+        if track['track_uri'] == uri:
+            #returning true if we find a match
+            return True
+    #returning false otherwise
+    return False
+
+def session_similarity(playlist, n = 10):
+    '''
+    determines which songs to recommend by summing binary session-based similarities of playlists containing
+    each song, weighted with IDF
+    @ inputs:
+    - playlist (dict): playlist that includes track info
+    - n (int): number of songs to recommend ; 10 for us
+    @ outputs:
+    - a list of tuples containing track name, artist name, and track link for unique songs with highest similarity score
+    '''
+    #creating a binary encoding of the user input playlist w.r.t. dataset
+    encoded_playlist = [int(is_uri_in_playlist(uri, playlist)) for uri in binary_df.index]
+    #computing similarity between input playlist and all other playlists
+    session_similarity = cosine_similarity(binary_df.values.T, [encoded_playlist]).flatten()
+    #creating an empty counter to store total similarity score
+    total_score = {}
+    #iterating through each song in dataset
+    for uri in binary_df.index:
+        #taking dot product of playlist similarities and song's presence in each playlist, applying IDF weighting
+        total_score[uri] = sum(i[0] * i[1] for i in zip(binary_df.loc[uri].values, session_similarity)) * idf_df.loc[uri][0]
+    #preventing songs in user input playlist from being suggested
+    repetition_blocker(total_score, playlist)
+    #using heap to find n highest total similarity scores
+    top_songs = [items[0] for items in heapq.nlargest(n, total_score.items(), key=lambda x: x[1])]
+    #returning a list of tuples containing the track name, artist name, and a link to the song for the most similar songs
+    return [(song_df['track_name'][song_df['uri'] == uri].values[0],
+            song_df['artist_name'][song_df['uri'] == uri].values[0],
+            '//open.spotify.com/track/' + song_df['id'][song_df['uri'] == uri].values[0]) for uri in top_songs]
+```
+
+## Session-Based Similarity
+
+
 In order to accept the playlist ID, we needed to build a function that could use the playlist ID and call the Spotify API to return the track URIs for the tracks in the playlist. First, we will use the `spotipy` library to access the playlist, set up authorization using the Spotify client ID and secret, and retrieve the list of track URIs and names. Then, we will create a list of dictionaries where each dictionary has a key `track_uri` with a value of the URI of a track. The output would be a dictionary with one key called tracks that has a value that is the list of dictionaries created above. This mimics the format of the playlists that come from a json file, so that the output can be passed into `get_top_songs()`. The function that handles this is defined below:
 
 ```python
@@ -258,11 +421,9 @@ def get_playlist_track_URIs(playlist_id):
 
 Now, we need to take all of these components into consideration when making our website. For this project, we use Flask to run our web app. On our home page, we have the recommendation app itself. It can take either a playlist id or a JSON file representing a playlist as its input, and it will output the recommendations after clicking “Submit”. The styling was based on trial and error, using official Spotify colors. The second page we built was the about page, where you can see all of our contact information.
 
-** INSERT PHOTO OF WHAT THE APP LOOKS LIKE **
-![Application Home](page.png)
+![Application Home Page](page.png)
 
-** INSERT PHOTO OF PLAYLIST RECOMMENDATIONS **
-![Playlist Recommendations](recs.png)
+![Sample Recommendations](recs.png)
 
 There are three pages on our website: Get Recommendations, About, and How to Find Playlist ID. Accordingly, there are three functions used to define these three pages. 
 
@@ -323,7 +484,9 @@ def tutorial():
 
 Creating this Spotify recommendation system involved four main steps: acquiring data, cleaning data, building the recommendation algorithm, and connecting it with a website. The Million Playlist Dataset provided by Spotify was used to acquire playlist information, and the Spotify API (reached via the spotipy library) was used to obtain audio features of songs. Data cleaning involved removing duplicate songs and normalizing data. Building the recommendation system involved cosine similarity measures to determine songs that have similar audio features. Finally, the system was deployed on a Flask web application where users could input a playlist, and the system would provide a list of song recommendations.
 
-Developing a Spotify recommendation system using Million Playlist Dataset and the Spotify API can be a rewarding and fun project for anyone interested in data science and music. Additionally, with the power of Flask, you can create a simple interface that allows users to submit their playlists and receive song recommendations in real-time. There are not too many ethical implications with our data. It may use user data, but since it is not hosted on cloud, nor stored on a database, there is no data that is being stored that would have the potential to be leaked. Overall, this project is an excellent way to explore how data science can be used for music and to explore various APIs and Python libraries.
+As for all data science projects, it is important to consider the ethical ramifications of what we create. A potential bias that may arise from this project could be that more well-known artists could be prioritized in recommendations, since we are recommending songs that are already in user playlists. This could unintentionally affect artists that have less popularity due to historical biases. Another potential source of bias is that the recommendation system may not work as well for music in foreign languages, since there will be less data of this type in the training dataset. If we wanted to improve the recommendation system for these types of songs, we would need to include datasets with more language diversity so that the model has more data points of this type to work with.
+
+Developing a Spotify recommendation system using Million Playlist Dataset and the Spotify API can be a rewarding and fun project for anyone interested in data science and music. Additionally, with the power of Flask, you can create a simple interface that allows users to submit their playlists and receive song recommendations in real-time. Overall, this project is an excellent way to explore how data science can be used for music and to explore various APIs and Python libraries.
 
 ## GitHub Repository
 

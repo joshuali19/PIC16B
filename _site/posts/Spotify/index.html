@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.313">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Joshua Li">
+<meta name="dcterms.date" content="2023-03-24">
+
+<title>Joshua Li - Recommending Spotify Songs in Python</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Joshua Li</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/joshuali19"><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/joshuali19"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Recommending Spotify Songs in Python</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">code</div>
+                <div class="quarto-category">analysis</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Joshua Li </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">March 24, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level1">
+<h1>1. Introduction</h1>
+<p>With streaming services like Spotify, we have access to millions of songs at our fingertips. However, with so many options, it can be difficult to discover new artists and songs that we might enjoy. This is where recommendation systems come in.</p>
+<p>This blog post is a recap of a final project for PIC16B W23 at UCLA. The goal of this project is to create a song recommendation system that would recommend songs for a given playlist. To do this, we utilized the Million Playlist Dataset, which Spotify provided for this purpose. There are 1 million playlists within this dataset, as the name suggests. With this data, we conducted our project through 4 main steps:</p>
+<ol type="1">
+<li><a href="#data-acquisition">Acquiring the data necessary for recommendation</a></li>
+<li><a href="#data-cleaning">Cleaning the data</a></li>
+<li><a href="#building-a-recommendation-system">Building the Recommendation System</a></li>
+<li><a href="#building-a-website-to-host-recommendation-system">Connecting it with a website to host the recommendation system</a></li>
+</ol>
+<p>This blog post will go through the process of creating a recommendation system step-by-step, as well as explain some of the methods we used to create it. We learned a lot through this project, and we hope that you do too! Now, let’s get into it. Here is a diagram of the project workflow.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="workflow.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Project Workflow</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="data-acquisition" class="level1">
+<h1>2. Data Acquisition</h1>
+<section id="million-playlist-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="million-playlist-dataset">Million Playlist Dataset</h2>
+<p>The first thing is to acquire the data necessary for this project. As mentioned in the introduction, we utilize the Spotify Million Playlist Dataset as our base dataset. This gives us each playlist in the form of a JSON file. Each playlist contains information about the playlist itself, like the number of songs, likes, playlist creator, etc. It also contains the information about the tracks within the playlist. For each track, there is information about the artist, the album it is a part of, and has unique identifiers for all of these things. This is all basic information that we can use. However, in order to build a recommendation system based on tracks and playlists, we need more than just demographic information of songs. We need to look into variables that would highlight specific features of songs. If you would like more information on the Million Playlist Dataset, please look at the <a href="https://www.aicrowd.com/challenges/spotify-million-playlist-dataset-challenge">official challenge spec</a></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="playlist_json.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Playlist JSON File</figcaption><p></p>
+</figure>
+</div>
+<p>Above is the structure of the JSON file for an example playlist. This was provided by the provider of the Million Playlist Dataset, AICrowd. One can see all the playlist attributes listed, and the final one with all the tracks. In order to go through every single track in each playlist, we need to go through each of the different playlists and go through each of the tracks. After some experimentation, the fastest method was still to use a nested for loop to go through each element. However, this information given in the Million Playlist Dataset is not sufficient for our project.</p>
+</section>
+<section id="spotify-api" class="level2">
+<h2 class="anchored" data-anchor-id="spotify-api">Spotify API</h2>
+<p>This is where we need to connect to the Spotify API through <code>spotipy</code>. <code>spotipy</code> is a python library that allows users to connect to the Spotify API from the jupyter notebook, allowing access to get features from tracks, artists, and albums. To get this information, we need to have a secret key that we need to create via the <a href="https://developer.spotify.com/">Spotify Developer Dashboard</a>. Once you create a project from the dashboard, it will give you a key and a secret to allow you to access the Spotify database.</p>
+<p>Here is a diagram that displays the connection between the Million Playlist Dataset and the Spotify API.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="api.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">API Connection</figcaption><p></p>
+</figure>
+</div>
+<p>Specifically, we want to look into getting the audio features of songs. These audio features are Spotify-created variables that describe a song quantitatively. Here is a list of the features that we use:</p>
+<ul>
+<li>Danceability</li>
+<li>Energy</li>
+<li>Speechiness</li>
+<li>Acousticness</li>
+<li>Instrumentalness</li>
+<li>Liveness</li>
+<li>Valence</li>
+<li>Loudness</li>
+<li>Tempo</li>
+<li>Mode</li>
+<li>Key</li>
+<li>Duration_ms</li>
+<li>Time_signature</li>
+</ul>
+<p>From “danceability” to “valence”, the values range from 0 to 1, with 0 being the lowest score and 1 being the highest. With “loudness”, the range goes from -60 to 0, with units in decibels. The “tempo” is in beats per minute, and the “mode” and “key” are nonnegative integers. The “duration_ms” is how long the song is in milliseconds, and the “time_signature” is a value from 3 to 7 reflecting an estimated time signature. For a full description of what these variables mean, look at the <a href="https://developer.spotify.com/documentation/web-api/reference/#/operations/get-several-audio-features">official Spotify docs</a>.</p>
+<p>We can extract these audio features through <code>spotipy.get_audio_features(uri)</code>, which takes in a track URI, which is a unique identifier for a given Spotify track. Here is a method that shows how we extracted the audio features for the songs, and saved it in a dataframe. This is the basis for extracting the data. Given our limited time frame and lack of resources, we only were able to extract features for 1,000 of the 1 million playlists. To expand on this project, we would want to look at how it pans out over even more playlists, but for the sake of this post, we will only be using 1,000 playlists.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> spotipy</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> spotipy.oauth2 <span class="im">import</span> SpotifyClientCredentials</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> time <span class="im">import</span> sleep</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Spotify credentials (unique to user) using different one to see if it works</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">"SPOTIPY_CLIENT_ID"</span>] <span class="op">=</span> <span class="st">"***"</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">"SPOTIPY_CLIENT_SECRET"</span>] <span class="op">=</span> <span class="st">"***"</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">'SPOTIPY_REDIRECT_URI'</span>] <span class="op">=</span> <span class="st">"http://localhost:5001"</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>sp <span class="op">=</span> spotipy.Spotify(client_credentials_manager <span class="op">=</span>      </span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>                     SpotifyClientCredentials(requests_timeout <span class="op">=</span> <span class="dv">10</span>))</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>cols_to_keep <span class="op">=</span> [<span class="st">'danceability'</span>, <span class="st">'energy'</span>, <span class="st">'key'</span>, <span class="st">'loudness'</span>, <span class="st">'mode'</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>                <span class="st">'speechiness'</span>, <span class="st">'acousticness'</span>, <span class="st">'instrumentalness'</span>, <span class="st">'liveness'</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>                <span class="st">'valence'</span>, <span class="st">'tempo'</span>, <span class="st">'duration_ms'</span>, <span class="st">'time_signature'</span>]</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> []</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> extract_data(playlists, n):</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># can change playlists[0:n] depending on whether or not we want to include all the data.</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>i <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co"># for playlist in first 1000 playlists</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> playlist <span class="kw">in</span> playlists[<span class="dv">0</span>:n]:</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    audio_feats <span class="op">=</span> []</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    track_names <span class="op">=</span> []</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    genres_list <span class="op">=</span> []</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    artist_name <span class="op">=</span> []</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># for every 10 playlists</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> i <span class="op">%</span> <span class="dv">10</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">'Extracting playlist </span><span class="sc">{0}</span><span class="st">...'</span>.<span class="bu">format</span>(i))</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># for each track in playlist</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> track <span class="kw">in</span> playlist[<span class="st">'tracks'</span>]:</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        <span class="co"># obtain track URI</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        track_uri <span class="op">=</span> track[<span class="st">'track_uri'</span>].split(<span class="st">":"</span>)[<span class="dv">2</span>]</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>        <span class="co"># obtain artist URI</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>        artist_uri <span class="op">=</span> track[<span class="st">'artist_uri'</span>].split(<span class="st">":"</span>)[<span class="dv">2</span>]</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        <span class="co"># get audio features from spotify</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        feature <span class="op">=</span> sp.audio_features(track_uri)</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> feature:</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>            audio_feats.append(feature[<span class="dv">0</span>])</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>            track_names.append(track[<span class="st">'track_name'</span>])</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>            artist_name.append(track[<span class="st">'artist_name'</span>])</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># make data frame of audio features for songs in playlist</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>    feats <span class="op">=</span> pd.DataFrame(audio_feats)</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    <span class="co"># add identification data</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    feats[<span class="st">'track_name'</span>] <span class="op">=</span> pd.Series(track_names)</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    feats[<span class="st">'artist_name'</span>] <span class="op">=</span> pd.Series(artist_name)</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    feats[<span class="st">'playlist_name'</span>] <span class="op">=</span> playlist[<span class="st">'name'</span>]</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    feats[<span class="st">'pid'</span>] <span class="op">=</span> playlist[<span class="st">'pid'</span>]</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    <span class="co"># list of data frames, each data frame representing tracks in a playlist</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>    i <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>    dfs.append(feats.T)</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>    sleep(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="data-cleaning" class="level1">
+<h1>3. Data Cleaning</h1>
+<p>From the data acquisition, we were able to get the features of songs from 1,000 playlists and contain all of this information on a CSV file. However, we still need to do some proper cleaning. This CSV is not in the optimal format for us to use for our analysis.</p>
+<section id="getting-rid-of-duplicate-songs" class="level2">
+<h2 class="anchored" data-anchor-id="getting-rid-of-duplicate-songs">Getting Rid of Duplicate Songs</h2>
+<p>The first thing that we need to do is to get rid of duplicate songs. Since we are reading in all songs from 1,000 playlists, and that some songs are extremely popular, it is highly likely that there will be songs that appear on multiple playlists. In terms of getting audio features, this is not helpful, so we need to omit these rows. Below is a function that we use to do that.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> drop_dups(df, cols):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df.drop_duplicates(subset <span class="op">=</span> cols) <span class="co"># dropping duplicate songs, on subset of cols</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="normalizing-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="normalizing-the-data">Normalizing the Data</h2>
+<p>Now that we have a dataset filled with only unique songs and their respective audio features, we can move forward with our processing of the data. Normalizing the data is a necessity in this project, because there are numeric variables that take on a wide range of values. For example, “danceability” has values from 0 to 1, while “duration_ms” has values that range from 0 to over 30000+. This may skew some of our results, placing too much weight on the “duration_ms” as opposed to other variables. To counteract this, we use a minimum-maximum scaler to normalize all numeric values to be between 0 and 1, based on the range in values for each feature. The logic and math behind it is shown below:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="minmax.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Min-Max Normalization Formula</figcaption><p></p>
+</figure>
+</div>
+<p>This is the method we used to create another CSV with only numeric variables reflecting the min-max normalization we mentioned above:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> norm_features(song_df):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">'''</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">    for the song df, normalize the numeric columns</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">    @ inputs:</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">    - song_df: df containing raw audio features of songs.</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">    @ outputs:</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">    - normalized_song_df: the normalized audio features of the songs</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">    '''</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># get numeric columns</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    numerics <span class="op">=</span> [<span class="st">'int16'</span>, <span class="st">'int32'</span>, <span class="st">'int64'</span>, <span class="st">'float16'</span>, <span class="st">'float32'</span>, <span class="st">'float64'</span>]</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    num_df <span class="op">=</span> song_df.select_dtypes(include<span class="op">=</span>numerics)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># scale these numeric columns</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    scaler <span class="op">=</span> MinMaxScaler()</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    normalized_song_df <span class="op">=</span> pd.DataFrame(scaler.fit_transform(num_df), columns <span class="op">=</span> num_df.columns)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    normalized_song_df[<span class="st">'uri'</span>] <span class="op">=</span> song_df[<span class="st">'uri'</span>].values</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> normalized_song_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We now have the cleaned data to build a recommendation system!</p>
+</section>
+</section>
+<section id="building-a-recommendation-system" class="level1">
+<h1>4. Building a Recommendation System</h1>
+<p>There are four different approaches to the recommendation system that we have attempted.</p>
+<section id="audio-features" class="level2">
+<h2 class="anchored" data-anchor-id="audio-features">Audio Features</h2>
+<p>As mentioned above in the data cleaning, we sought to use the audio features from Spotify to help us create a recommendation system. Since we have a normalized data frame that was created above, we can use the normalized features for each song to represent a vector in a space. When we compare two songs, we are essentially comparing two vectors in the same vector space. To evaluate how “similar” two songs are to one another in this way, we utilize cosine similarity, which is looking at the angle between the two vectors to assess the similarity. If two vectors are the same (the same song), then cosine similarity will assign a score of 1, meaning that it is exactly similar, which makes sense. If the vector is pointed parallel, but in the opposite direction, the cosine similarity will assign a score of -1, meaning that they are not similar at all. Any angle in between will have a score between -1 and 1, with being closer to 1 meaning that the two songs are more similar.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="cosine.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Cosine Similarity</figcaption><p></p>
+</figure>
+</div>
+<p>We first utilize cosine similarity to assess the difference between two songs. This is done through our <code>get_similarity_scores()</code> method.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_similarity_scores(df, feat_df, uri, n, model_type <span class="op">=</span> cosine_similarity):</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">'''</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">    gets the top n songs to recommend songs similar to one song.</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">    @ inputs:</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">    - df (pd.DataFrame): input dataframe with audio features</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">    - song_title (str): title of track</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">    - n (int): number of recommended songs</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">    - model_type (df): gets the cosine similarity of big matrix</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">    @ outputs:</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">    - pandas series. of recommended songs</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">    '''</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get song indices</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    index<span class="op">=</span>indices[uri]</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    numerics <span class="op">=</span> [<span class="st">'int16'</span>, <span class="st">'int32'</span>, <span class="st">'int64'</span>, <span class="st">'float16'</span>, <span class="st">'float32'</span>, <span class="st">'float64'</span>]</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    num_df <span class="op">=</span> feat_df.select_dtypes(include<span class="op">=</span>numerics)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># print(index)</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    tfidf <span class="op">=</span> model_type(num_df.iloc[index].values.reshape(<span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>), num_df[:].drop(index <span class="op">=</span> index))[<span class="dv">0</span>]</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># print(tfidf[0])</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get list of songs for given songs</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    score<span class="op">=</span><span class="bu">list</span>(<span class="bu">enumerate</span>(tfidf))</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># print(score)</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sort the most similar songs</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    similarity_score <span class="op">=</span> <span class="bu">sorted</span>(score,key <span class="op">=</span> <span class="kw">lambda</span> x:x[<span class="dv">1</span>],reverse <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Counter(<span class="bu">dict</span>(similarity_score))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>However, this only gets the similarity of one song compared to a whole data frame. How does this apply to a whole playlist? We use this function for each of the tracks, and then get an aggregate score for each recommended song. The logic of this approach is to assess the cosine similarity between all the songs in the playlist and all the songs in the normalized audio features data frame. We then add up all the scores by song id, and will take the top 10 songs based on this aggregate sum of cosine similarity. The method is shown below:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_top_songs(playlist, song_df, feat_df, n <span class="op">=</span> <span class="dv">10</span>):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    total_score <span class="op">=</span> Counter()</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> track <span class="kw">in</span> playlist[<span class="st">'tracks'</span>]:</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>            total_score <span class="op">+=</span> get_similarity_scores(song_df, feat_df, </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                            track[<span class="st">'track_uri'</span>], <span class="dv">5</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    topn_index <span class="op">=</span> indices[<span class="bu">sorted</span>(<span class="bu">dict</span>(total_score), key <span class="op">=</span> <span class="kw">lambda</span> x: x, reverse <span class="op">=</span> <span class="va">True</span>)[<span class="dv">0</span>:n]].index</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [song_df[<span class="st">'track_name'</span>][song_df[<span class="st">'uri'</span>] <span class="op">==</span> uri].values[<span class="dv">0</span>] <span class="cf">for</span> uri <span class="kw">in</span> topn_index]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This is most definitely not the best method, as these quantitative features are not clustered well by genre. Multiple genres may show similar values within certain features. I expect electronic dance music (EDM) and metal to score highly on the loudness metric, even though they are two completely different genres. One improvement to make with this is to incorporate the genres of the songs with the audio features to make better assessments and recommendations.</p>
+</section>
+<section id="collaborative-filtering" class="level2">
+<h2 class="anchored" data-anchor-id="collaborative-filtering">Collaborative Filtering</h2>
+<p>The next three approaches will deal with a mathematical exploration of a technique common in the field of recommender systems, collaborative filtering. The premise of collaborative filtering is simple, being that if two people like one thing, then they are more likely to agree on their like/dislike for other things. Thanks to the Million Playlist Dataset, we have access to a massive amount of information concerning peoples’ preferences with respect to each other: deciding to include a song in one’s playlist is implicitly indicating a preference for that song. As a result, there are a wide variety of effective heuristics for determining similarity that can be applied to the user’s playlist, and the songs it contains, with respect to other playlists. We primarily opted to explore various forms of memory-based CF (also known as nearest-neighbor CF).</p>
+</section>
+<section id="item-based-similarity" class="level2">
+<h2 class="anchored" data-anchor-id="item-based-similarity">Item-Based Similarity</h2>
+<p>One approach to memory based CF, not unlike our method for audio features, is to view the user’s playlist as the sum of its parts. If we can find a way to determine similarity between any two songs, then we can take the similarity of each song in the user’s playlist with respect to every other song in our dataset, and then identify the songs with the highest summed similarity not already in the user’s playlist as potential recommendations. To find the similarity between any two songs, we employ the presence of a song in each playlist of our dataset as a binary vector, and compute the cosine similarity between these vectors accordingly. Finally, we weigh the summed similarity for each song based on its inverse document frequency, and select information from the songs having the highest final values. The functions used for this method are shown below:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> item_similarity(uri):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">'''</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">    gets the cosine similarity between an input song and every other song in the dataset</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">    @ inputs:</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">    - uri (string): input song's uri</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">    @ outputs:</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">    - counter dictionary whose keys are uri values of each song in dataset, values are similarity to input song</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">    '''</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">#identifying row in binary_df corresponding to input song</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    song_row <span class="op">=</span> binary_df.loc[uri].values.reshape(<span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">#computing similarity between input song and all other songs</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    similarity_scores <span class="op">=</span> cosine_similarity(binary_df, song_row)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    similarity_dict <span class="op">=</span> {}</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">#creating a dictionary with URI as keys, associated similarity as values</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, score <span class="kw">in</span> <span class="bu">enumerate</span>(similarity_scores):</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        similarity_dict[<span class="bu">str</span>(binary_df.index[i])] <span class="op">=</span> score[<span class="dv">0</span>]</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">#returning counter version of dictionary, so that we can add it to others</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Counter(similarity_dict)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_top_items(playlist, n <span class="op">=</span> <span class="dv">10</span>):</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">'''</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co">    determines which songs to recommend by summing binary item-based similarity for songs in user playlist, weighted with idf</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co">    @ inputs:</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co">    - playlist (dict): playlist that includes track info</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="co">    - n (int): number of songs to recommend ; 10 for us</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="co">    @ outputs:</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="co">    - a list of tuples containing track name, artist name, and track link for unique songs with highest similarity score</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="co">    '''</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="co">#creating an empty counter to store total similarity score</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    total_score <span class="op">=</span> Counter()</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> track <span class="kw">in</span> playlist[<span class="st">'tracks'</span>]:</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">#using addition assignment to add each similarity score</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> track[<span class="st">'track_uri'</span>] <span class="kw">in</span> binary_df.index:</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>                total_score <span class="op">+=</span> item_similarity(track[<span class="st">'track_uri'</span>])</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    <span class="co">#applying IDF weighting to total similarity score</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> uri <span class="kw">in</span> total_score.keys():</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>        total_score[uri] <span class="op">*=</span> idf_df.loc[uri][<span class="dv">0</span>]</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">#preventing songs in user input playlist from being suggested</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    repetition_blocker(total_score, playlist)</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    <span class="co">#using heap to find list of URIs associated with highest total similarity scores</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    top_songs <span class="op">=</span> [items[<span class="dv">0</span>] <span class="cf">for</span> items <span class="kw">in</span> heapq.nlargest(n, total_score.items(), key<span class="op">=</span><span class="kw">lambda</span> x: x[<span class="dv">1</span>])]</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    <span class="co">#top_songs = heapq.nlargest(n, total_score.items(), key=lambda x: x[1])</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    <span class="co">#returning a list of tuples containing the track name, artist name, and a link to the song for the most similar songs</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [(song_df[<span class="st">'track_name'</span>][song_df[<span class="st">'uri'</span>] <span class="op">==</span> uri].values[<span class="dv">0</span>],</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>            song_df[<span class="st">'artist_name'</span>][song_df[<span class="st">'uri'</span>] <span class="op">==</span> uri].values[<span class="dv">0</span>],</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>            <span class="st">'//open.spotify.com/track/'</span> <span class="op">+</span> song_df[<span class="st">'id'</span>][song_df[<span class="st">'uri'</span>] <span class="op">==</span> uri].values[<span class="dv">0</span>]) <span class="cf">for</span> uri <span class="kw">in</span> top_songs]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="session-based-similarity" class="level2">
+<h2 class="anchored" data-anchor-id="session-based-similarity">Session-Based Similarity</h2>
+<p>Another approach to memory based CF is to find a way to compare playlists directly over the song space. Instead of viewing songs as binary vectors based on their presence in playlists, we can view playlists as binary vectors based on whether or not they contain each song, and calculate cosine similarities between playlists accordingly. Then, for each song, we can take the idf-weighted sum of the aforementioned similarity between the user’s playlist and every playlist in the dataset that contains that song to yield a total similarity score, returning the same information as before about those songs with the highest total similarity scores. The functions used for this method are shown below:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> is_uri_in_playlist(uri, playlist):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">'''</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">    determines whether or not each song in the dataset is in the user's playlist</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">    @ inputs:</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">    -uri (str): input song's uri</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">    - playlist (dict): playlist that includes track info</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">    @ outputs:</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">    - true or false depending on whether or not song is in playlist</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">    '''</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">#iterating through each track in user input playlist</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> track <span class="kw">in</span> playlist[<span class="st">'tracks'</span>]:</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">#checking if desired URI matches a track's URI</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> track[<span class="st">'track_uri'</span>] <span class="op">==</span> uri:</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>            <span class="co">#returning true if we find a match</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">True</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">#returning false otherwise</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> session_similarity(playlist, n <span class="op">=</span> <span class="dv">10</span>):</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">'''</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="co">    determines which songs to recommend by summing binary session-based similarities of playlists containing</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="co">    each song, weighted with IDF</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="co">    @ inputs:</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="co">    - playlist (dict): playlist that includes track info</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="co">    - n (int): number of songs to recommend ; 10 for us</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="co">    @ outputs:</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="co">    - a list of tuples containing track name, artist name, and track link for unique songs with highest similarity score</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="co">    '''</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    <span class="co">#creating a binary encoding of the user input playlist w.r.t. dataset</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    encoded_playlist <span class="op">=</span> [<span class="bu">int</span>(is_uri_in_playlist(uri, playlist)) <span class="cf">for</span> uri <span class="kw">in</span> binary_df.index]</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">#computing similarity between input playlist and all other playlists</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    session_similarity <span class="op">=</span> cosine_similarity(binary_df.values.T, [encoded_playlist]).flatten()</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">#creating an empty counter to store total similarity score</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>    total_score <span class="op">=</span> {}</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    <span class="co">#iterating through each song in dataset</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> uri <span class="kw">in</span> binary_df.index:</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>        <span class="co">#taking dot product of playlist similarities and song's presence in each playlist, applying IDF weighting</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>        total_score[uri] <span class="op">=</span> <span class="bu">sum</span>(i[<span class="dv">0</span>] <span class="op">*</span> i[<span class="dv">1</span>] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">zip</span>(binary_df.loc[uri].values, session_similarity)) <span class="op">*</span> idf_df.loc[uri][<span class="dv">0</span>]</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    <span class="co">#preventing songs in user input playlist from being suggested</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>    repetition_blocker(total_score, playlist)</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>    <span class="co">#using heap to find n highest total similarity scores</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    top_songs <span class="op">=</span> [items[<span class="dv">0</span>] <span class="cf">for</span> items <span class="kw">in</span> heapq.nlargest(n, total_score.items(), key<span class="op">=</span><span class="kw">lambda</span> x: x[<span class="dv">1</span>])]</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    <span class="co">#returning a list of tuples containing the track name, artist name, and a link to the song for the most similar songs</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [(song_df[<span class="st">'track_name'</span>][song_df[<span class="st">'uri'</span>] <span class="op">==</span> uri].values[<span class="dv">0</span>],</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>            song_df[<span class="st">'artist_name'</span>][song_df[<span class="st">'uri'</span>] <span class="op">==</span> uri].values[<span class="dv">0</span>],</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>            <span class="st">'//open.spotify.com/track/'</span> <span class="op">+</span> song_df[<span class="st">'id'</span>][song_df[<span class="st">'uri'</span>] <span class="op">==</span> uri].values[<span class="dv">0</span>]) <span class="cf">for</span> uri <span class="kw">in</span> top_songs]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="tf-idf-based-similarity" class="level2">
+<h2 class="anchored" data-anchor-id="tf-idf-based-similarity">TF-IDF-Based Similarity</h2>
+<p>Our final approach to memory based CF is to incorporate term frequency into the computation of our similarity heuristic. Unlike inverse document frequency, our term frequency has no dependence upon a particular song. The idea we want to capture is that if a user’s playlist contains fewer songs, then any given song is a stronger indication of their interest than a playlist that contains many songs. Therefore, we assign to each playlist a term frequency value of 1/(|p|+50), where |p| is the number of songs in that playlist and 50 is chosen so as not to excessively reward very small playlists. Then, each song/playlist pair is assigned a value equal to the product of the song’s IDF and the playlists TF (irrespective of whether or not the playlist contains that song), and we compute cosine similarity on playlists and total song similarity for each song identically to the session-based method, except, as we have already accounted for IDF, we do not reweigh final scores based on IDF. Once again, we return relevant information about the songs with the highest total similarity scores. The functions used for this method are shown below:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> is_uri_in_playlist(uri, playlist):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">'''</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">    determines whether or not each song in the dataset is in the user's playlist</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">    @ inputs:</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">    -uri (str): input song's uri</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">    - playlist (dict): playlist that includes track info</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">    @ outputs:</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">    - true or false depending on whether or not song is in playlist</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">    '''</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">#iterating through each track in user input playlist</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> track <span class="kw">in</span> playlist[<span class="st">'tracks'</span>]:</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">#checking if desired URI matches a track's URI</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> track[<span class="st">'track_uri'</span>] <span class="op">==</span> uri:</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>            <span class="co">#returning true if we find a match</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">True</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">#returning false otherwise</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> session_similarity(playlist, n <span class="op">=</span> <span class="dv">10</span>):</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">'''</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co">    determines which songs to recommend by summing binary session-based similarities of playlists containing</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co">    each song, weighted with IDF</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co">    @ inputs:</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="co">    - playlist (dict): playlist that includes track info</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="co">    - n (int): number of songs to recommend ; 10 for us</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="co">    @ outputs:</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="co">    - a list of tuples containing track name, artist name, and track link for unique songs with highest similarity score</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="co">    '''</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    <span class="co">#creating a binary encoding of the user input playlist w.r.t. dataset</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    encoded_playlist <span class="op">=</span> [<span class="bu">int</span>(is_uri_in_playlist(uri, playlist)) <span class="cf">for</span> uri <span class="kw">in</span> binary_df.index]</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">#computing similarity between input playlist and all other playlists</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    session_similarity <span class="op">=</span> cosine_similarity(binary_df.values.T, [encoded_playlist]).flatten()</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">#creating an empty counter to store total similarity score</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    total_score <span class="op">=</span> {}</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    <span class="co">#iterating through each song in dataset</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> uri <span class="kw">in</span> binary_df.index:</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>        <span class="co">#taking dot product of playlist similarities and song's presence in each playlist, applying IDF weighting</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>        total_score[uri] <span class="op">=</span> <span class="bu">sum</span>(i[<span class="dv">0</span>] <span class="op">*</span> i[<span class="dv">1</span>] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">zip</span>(binary_df.loc[uri].values, session_similarity)) <span class="op">*</span> idf_df.loc[uri][<span class="dv">0</span>]</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    <span class="co">#preventing songs in user input playlist from being suggested</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>    repetition_blocker(total_score, playlist)</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    <span class="co">#using heap to find n highest total similarity scores</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    top_songs <span class="op">=</span> [items[<span class="dv">0</span>] <span class="cf">for</span> items <span class="kw">in</span> heapq.nlargest(n, total_score.items(), key<span class="op">=</span><span class="kw">lambda</span> x: x[<span class="dv">1</span>])]</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    <span class="co">#returning a list of tuples containing the track name, artist name, and a link to the song for the most similar songs</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [(song_df[<span class="st">'track_name'</span>][song_df[<span class="st">'uri'</span>] <span class="op">==</span> uri].values[<span class="dv">0</span>],</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>            song_df[<span class="st">'artist_name'</span>][song_df[<span class="st">'uri'</span>] <span class="op">==</span> uri].values[<span class="dv">0</span>],</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>            <span class="st">'//open.spotify.com/track/'</span> <span class="op">+</span> song_df[<span class="st">'id'</span>][song_df[<span class="st">'uri'</span>] <span class="op">==</span> uri].values[<span class="dv">0</span>]) <span class="cf">for</span> uri <span class="kw">in</span> top_songs]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="session-based-similarity-1" class="level2">
+<h2 class="anchored" data-anchor-id="session-based-similarity-1">Session-Based Similarity</h2>
+<p>In order to accept the playlist ID, we needed to build a function that could use the playlist ID and call the Spotify API to return the track URIs for the tracks in the playlist. First, we will use the <code>spotipy</code> library to access the playlist, set up authorization using the Spotify client ID and secret, and retrieve the list of track URIs and names. Then, we will create a list of dictionaries where each dictionary has a key <code>track_uri</code> with a value of the URI of a track. The output would be a dictionary with one key called tracks that has a value that is the list of dictionaries created above. This mimics the format of the playlists that come from a json file, so that the output can be passed into <code>get_top_songs()</code>. The function that handles this is defined below:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_playlist_track_URIs(playlist_id):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">'''</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">    gets the track URIs from a Spotify playlist</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">    @ inputs:</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">    - playlist_id (str)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">        The unique identifier for the Spotify playlist.</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">    @ output:</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">    dict containing: track_uris (list of str)</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">                         A list of the track URIs for all tracks in the playlist.</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">                     track_names (list of str)</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">                            A list of the track names for all tracks in the playlist.</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">    '''</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Set up authorization using the Spotify client ID and secret</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    client_credentials_manager <span class="op">=</span> SpotifyClientCredentials(client_id<span class="op">=</span><span class="st">'bdf64242b8364ab5b264d3c14e8e9af6'</span>, client_secret<span class="op">=</span><span class="st">'3ed931eb80d8412292a50a10ed96e611'</span>)</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    sp <span class="op">=</span> spotipy.Spotify(client_credentials_manager<span class="op">=</span>client_credentials_manager)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get track URIs and names from playlist</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> sp.playlist_tracks(playlist_id)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    tracks <span class="op">=</span> results[<span class="st">'items'</span>]</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    playlist_tracks <span class="op">=</span> []</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> track <span class="kw">in</span> tracks:</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>        track_uri <span class="op">=</span> track[<span class="st">'track'</span>][<span class="st">'uri'</span>]</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>        playlist_tracks.append({<span class="st">'track_uri'</span>: track_uri})</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">"tracks"</span>: playlist_tracks}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="building-a-website-to-host-recommendation-system" class="level1">
+<h1>5. Building A Website to Host Recommendation System</h1>
+<p>Now, we need to take all of these components into consideration when making our website. For this project, we use Flask to run our web app. On our home page, we have the recommendation app itself. It can take either a playlist id or a JSON file representing a playlist as its input, and it will output the recommendations after clicking “Submit”. The styling was based on trial and error, using official Spotify colors. The second page we built was the about page, where you can see all of our contact information.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="page.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Application Home Page</figcaption><p></p>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="recs.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Sample Recommendations</figcaption><p></p>
+</figure>
+</div>
+<p>There are three pages on our website: Get Recommendations, About, and How to Find Playlist ID. Accordingly, there are three functions used to define these three pages.</p>
+<p>The first function we will walk through is the Get Recommendations page. In this function, if the method is GET, it returns the rendered HTML template defined in <code>recommend.html</code>. Otherwise, if the method is POST, it processes the input data to find the top recommended songs based on a user’s submitted playlist using <code>get_playlist_track_URIs()</code> if a playlist ID is inputted and <code>get_file()</code> if a file is uploaded. In either case, <code>get_top_songs()</code> will be run to produce the recommendations once the playlist is identified. If the recommendation process is successful, it returns the rendered HTML template <code>recommend.html</code> displaying the top recommended songs. If there is an error during the process, it will return an error message.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.route</span>(<span class="st">'/'</span>, methods<span class="op">=</span>[<span class="st">'POST'</span>, <span class="st">'GET'</span>])</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> recommend():</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> request.method <span class="op">==</span> <span class="st">'GET'</span>:</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> render_template(<span class="st">'recommend.html'</span>) <span class="co"># default recommend.html display</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>: <span class="co"># if someone posts</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>            <span class="co"># get playlist, and find top songs</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>            playlist <span class="op">=</span> request.form[<span class="st">'playlist_id'</span>]</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>            <span class="co"># checks to see if playlist has been submitted as ID or json file</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> playlist:</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>                playlist <span class="op">=</span> get_file(request)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>                <span class="co"># get track URIs and names from playlist using Spotify API</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>                playlist <span class="op">=</span> get_playlist_track_URIs(playlist)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>            top_songs <span class="op">=</span> get_top_songs(playlist, song_df, feats_df)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>            <span class="co"># display the top songs</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> render_template(<span class="st">'recommend.html'</span>, recs <span class="op">=</span> top_songs)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span>:</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>            <span class="co"># return an error</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> render_template(<span class="st">'recommend.html'</span>, error <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The second function creates a simple About page. It will render a page with information about the creators that is defined in <code>about.html</code>. The construction of this function is similar to that of the function defined previously.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.route</span>(<span class="st">'/about/'</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> about():</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        <span class="co"># about page for creators</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> render_template(<span class="st">'about.html'</span>, msgs <span class="op">=</span> msgs)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span>:</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># return an error</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> render_template(<span class="st">'about.html'</span>, error <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Lastly, we will create a third function that creates a page that instructs the user on how to obtain the spotify playlist ID of any playlist. Similar to the function defining the About page, this function will render an HTML template that is defined in <code>tutorial.html</code>.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.route</span>(<span class="st">'/tutorial/'</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> tutorial():</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        <span class="co"># tutorial page for how to find playlist id</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> render_template(<span class="st">'tutorial.html'</span>, msgs <span class="op">=</span> msgs)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span>:</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># return an error</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> render_template(<span class="st">'tutorial.html'</span>, error <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="conclusion" class="level1">
+<h1>6. Conclusion</h1>
+<p>Creating this Spotify recommendation system involved four main steps: acquiring data, cleaning data, building the recommendation algorithm, and connecting it with a website. The Million Playlist Dataset provided by Spotify was used to acquire playlist information, and the Spotify API (reached via the spotipy library) was used to obtain audio features of songs. Data cleaning involved removing duplicate songs and normalizing data. Building the recommendation system involved cosine similarity measures to determine songs that have similar audio features. Finally, the system was deployed on a Flask web application where users could input a playlist, and the system would provide a list of song recommendations.</p>
+<p>As for all data science projects, it is important to consider the ethical ramifications of what we create. A potential bias that may arise from this project could be that more well-known artists could be prioritized in recommendations, since we are recommending songs that are already in user playlists. This could unintentionally affect artists that have less popularity due to historical biases. Another potential source of bias is that the recommendation system may not work as well for music in foreign languages, since there will be less data of this type in the training dataset. If we wanted to improve the recommendation system for these types of songs, we would need to include datasets with more language diversity so that the model has more data points of this type to work with.</p>
+<p>Developing a Spotify recommendation system using Million Playlist Dataset and the Spotify API can be a rewarding and fun project for anyone interested in data science and music. Additionally, with the power of Flask, you can create a simple interface that allows users to submit their playlists and receive song recommendations in real-time. Overall, this project is an excellent way to explore how data science can be used for music and to explore various APIs and Python libraries.</p>
+<section id="github-repository" class="level2">
+<h2 class="anchored" data-anchor-id="github-repository">GitHub Repository</h2>
+<p>Here is the <a href="https://github.com/joshuali19/pic16bproject">GitHub repository</a> if you would like to check it out.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
